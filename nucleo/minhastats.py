@@ -112,28 +112,3 @@ def correlacao_pearson(x, y):
     desvio_x = desvio_padrao(x)
     desvio_y = desvio_padrao(y)
     return cov / (desvio_x * desvio_y)
-
-
-if __name__ == "__main__":
-    idades = [18393, 20228, 18857, 17623, 17474]
-    print(media(idades))
-
-    notas = [7, 8, 8, 9, 8, 6]
-    print(mediana(notas))
-    print(moda(notas))
-
-    turma_b = [2, 6, 10, 10]
-    print(amplitude(turma_b))
-    print(variancia(turma_b))
-    print(desvio_padrao(turma_b))
-
-    dados_iqr = [8, 2, 12, 4, 10, 4, 6]
-    print(percentil(dados_iqr, 90))
-    print(quartis(dados_iqr))
-    print(iqr(dados_iqr))
-
-    pesos = [60, 70, 80, 90, 100]
-    alturas = [160, 165, 175, 180, 190]
-    print(coeficiente_variacao(turma_b))
-    print(covariancia(pesos, alturas))
-    print(correlacao_pearson(pesos, alturas))
