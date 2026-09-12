@@ -3,6 +3,7 @@ import os
 # permite importar arquivos da pasta nucleo/, que fica um nivel acima desta pasta (app/)
 sys.path.append(os.path.dirname(__file__) + "/..")
 
+import random
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -10,6 +11,33 @@ from nucleo.minhastats import (
     media, mediana, moda, amplitude, variancia, desvio_padrao,
     coeficiente_variacao, quartis, iqr
 )
+
+def simular_lancamentos_moeda(n_lancamentos):
+    """Simula n lancamentos de moeda (0=coroa, 1=cara) e retorna a lista de resultados."""
+    return [random.randint(0, 1) for _ in range(n_lancamentos)]
+
+
+def frequencia_relativa_acumulada(resultados):
+    """Para cada lancamento, calcula a frequencia relativa acumulada de caras ate aquele ponto.
+    Isso gera os pontos do grafico que mostra a convergencia."""
+    frequencias = []
+    soma_caras = 0
+    for i, resultado in enumerate(resultados):
+        soma_caras += resultado
+        frequencias.append(soma_caras / (i + 1))
+    return frequencias
+
+def simular_medias_amostrais(dados_originais, tamanho_amostra, n_repeticoes):
+    """Sorteia 'n_repeticoes' amostras de tamanho 'tamanho_amostra' da lista original,
+    calcula a media de cada amostra sorteada e retorna a lista dessas medias."""
+    medias_amostrais = []
+    for _ in range(n_repeticoes):
+        # random.sample sorteia sem reposicao (nao repete o mesmo registro na mesma amostra)
+        amostra = random.sample(dados_originais, tamanho_amostra)
+        media_da_amostra = media(amostra)
+        medias_amostrais.append(media_da_amostra)
+    return medias_amostrais
+
 
 st.title("Laboratório Estatístico — Saúde Cardiovascular")
 
@@ -120,6 +148,7 @@ st.write(f"Foram encontrados **{len(outliers)}** outliers ({len(outliers)/len(va
 st.write("---")
 st.subheader("Estatística Descritiva — Variáveis Categóricas")
 
+# mesmo padrao do selectbox anterior: mostra nome traduzido, guarda nome real da coluna
 variavel_cat = st.selectbox(
     "Escolha uma variável categórica:",
     colunas_categoricas,
@@ -149,3 +178,54 @@ with col6:
     ax4.pie(tabela_frequencia["Frequência"], labels=tabela_frequencia["Categoria"], autopct="%1.1f%%")
     ax4.set_title(f"Pizza — {nomes_categoricas[variavel_cat]}")
     st.pyplot(fig4)
+
+# ========== SECAO: MODULO 3 - MONTE CARLO (Lei dos Grandes Numeros) ==========
+st.write("---")
+st.subheader("Módulo 3 — Simulação de Monte Carlo: Lei dos Grandes Números")
+
+# usuario controla quantos lancamentos de moeda serao simulados (requisito do enunciado)
+n_lancamentos = st.slider("Número de lançamentos da moeda:", min_value=10, max_value=10000, value=1000, step=10)
+
+resultados = simular_lancamentos_moeda(n_lancamentos)
+frequencias = frequencia_relativa_acumulada(resultados)
+
+# grafico mostra a frequencia relativa se estabilizando perto de 0.5 conforme os lancamentos aumentam
+fig5, ax5 = plt.subplots()
+ax5.plot(frequencias, color="#C44E52")
+ax5.axhline(y=0.5, color="black", linestyle="--", label="Probabilidade teórica (0.5)")
+ax5.set_xlabel("Número de lançamentos")
+ax5.set_ylabel("Frequência relativa de caras")
+ax5.legend()
+st.pyplot(fig5)
+
+st.write(f"Frequência relativa final (após {n_lancamentos} lançamentos): {frequencias[-1]:.4f}")   
+
+# ========== SECAO: MODULO 3 - MONTE CARLO (Teorema Central do Limite) ==========
+st.write("---")
+st.subheader("Módulo 3 — Simulação de Monte Carlo: Teorema Central do Limite")
+
+# selectbox separado do de cima, precisa de 'key' unica para o Streamlit nao confundir os dois
+variavel_tcl = st.selectbox(
+    "Escolha a variável para sortear amostras:",
+    colunas_numericas,
+    format_func=lambda c: nomes_numericas[c],
+    key="tcl_variavel"
+)
+
+# usuario controla tamanho da amostra e numero de repeticoes
+tamanho_amostra = st.slider("Tamanho de cada amostra:", min_value=2, max_value=200, value=30, key="tcl_tamanho")
+n_repeticoes = st.slider("Número de amostras sorteadas:", min_value=10, max_value=5000, value=1000, key="tcl_repeticoes")
+
+dados_variavel_tcl = dados[variavel_tcl].tolist()
+medias_amostrais = simular_medias_amostrais(dados_variavel_tcl, tamanho_amostra, n_repeticoes)
+
+# histograma das medias amostrais: quanto maior o tamanho da amostra, mais proximo de uma Normal
+fig6, ax6 = plt.subplots()
+ax6.hist(medias_amostrais, bins=30, color="#8172B2")
+ax6.set_title(f"Distribuição das médias amostrais — {nomes_numericas[variavel_tcl]}")
+ax6.set_xlabel("Média da amostra")
+ax6.set_ylabel("Frequência")
+st.pyplot(fig6)
+
+st.write(f"Média das médias amostrais: {media(medias_amostrais):.2f}")
+st.write(f"Desvio padrão das médias amostrais: {desvio_padrao(medias_amostrais):.2f}")
