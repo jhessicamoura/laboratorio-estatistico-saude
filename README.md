@@ -8,7 +8,7 @@
 
 **Dataset:** Cardiovascular Disease Dataset · fonte original: [kaggle.com/datasets/sulianova/cardiovascular-disease-dataset](https://www.kaggle.com/datasets/sulianova/cardiovascular-disease-dataset)
 
-**Vídeo (3 a 5 min):** TODO — link (YouTube não listado ou Drive liberado, testado deslogado)
+**Vídeo:** https://youtu.be/QseYhAMAZ9o 
 
 ## Como rodar
 
