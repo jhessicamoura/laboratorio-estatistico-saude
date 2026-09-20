@@ -6,7 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import numpy as np
 from nucleo.minhastats import (
     media, mediana, moda, amplitude, variancia, desvio_padrao,
-    percentil, quartis, iqr, coeficiente_variacao, covariancia, correlacao_pearson
+    percentil, quartis, iqr, coeficiente_variacao, covariancia, correlacao_pearson, regressao_linear, r_quadrado
 )
 
 
@@ -93,3 +93,19 @@ def test_correlacao_pearson_bate_com_numpy():
     # numpy.corrcoef tambem retorna matriz 2x2; correlacao fica na posicao [0][1]
     esperado = np.corrcoef(x, y)[0][1]
     assert abs(correlacao_pearson(x, y) - esperado) < 1e-9
+
+def test_regressao_linear_bate_com_numpy():
+    x = [1, 2, 3, 4, 5]
+    y = [2, 4, 5, 4, 5]
+    a, b = regressao_linear(x, y)
+    # numpy.polyfit retorna [b, a] nessa ordem (inclinacao primeiro, intercepto depois)
+    b_esperado, a_esperado = np.polyfit(x, y, 1)
+    assert abs(a - a_esperado) < 1e-9
+    assert abs(b - b_esperado) < 1e-9
+
+
+def test_r_quadrado_bate_com_numpy():
+    x = [1, 2, 3, 4, 5]
+    y = [2, 4, 5, 4, 5]
+    esperado = np.corrcoef(x, y)[0][1] ** 2
+    assert abs(r_quadrado(x, y) - esperado) < 1e-9

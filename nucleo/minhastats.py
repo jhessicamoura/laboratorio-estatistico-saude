@@ -112,3 +112,21 @@ def correlacao_pearson(x, y):
     desvio_x = desvio_padrao(x)
     desvio_y = desvio_padrao(y)
     return cov / (desvio_x * desvio_y)
+
+def regressao_linear(x, y):
+    """Calcula os coeficientes a (intercepto) e b (inclinacao) da reta de regressao,
+    usando o metodo dos minimos quadrados: b = covariancia(x,y) / variancia(x)."""
+    b = covariancia(x, y) / variancia(x)
+    a = media(y) - b * media(x)
+    return a, b
+
+
+def prever(x_novo, a, b):
+    """Usa a equacao da reta (Y = a + bX) para prever um valor de Y dado um X novo."""
+    return a + b * x_novo
+
+
+def r_quadrado(x, y):
+    """Calcula o R2: o quadrado da correlacao de Pearson, mede o quanto a reta explica os dados."""
+    r = correlacao_pearson(x, y)
+    return r ** 2
